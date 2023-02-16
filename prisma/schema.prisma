@@ -77,4 +77,13 @@ model Element {
 model Document {
   id   String @id @default(cuid())
   name String
+
+  tags Tag[]
+}
+
+model Tag {
+  id   String @id @default(cuid())
+  name String
+
+  documents Document[]
 }

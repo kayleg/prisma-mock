@@ -256,6 +256,40 @@ describe("PrismaClient", () => {
     ]);
   });
 
+  test("connect multiple implicit", async () => {
+    const client = await createPrismaClient({});
+    const account = await client.account.create({
+      data: {
+        id: 1,
+        name: "New account",
+      },
+    });
+    const account2 = await client.account.create({
+      data: {
+        id: 2,
+        name: "Another New account",
+      },
+    });
+    const user = await client.user.create({
+      data: {
+        name: "New user",
+        guestOf: { connect: [{ id: 1 }, { id: 2 }] },
+      },
+    });
+    const users = await client.user.findMany({
+      include: {
+        guestOf: true,
+      },
+    });
+
+    expect(users).toEqual([
+      {
+        ...user,
+        guestOf: [account, account2],
+      },
+    ]);
+  });
+
   test("connect on secondary key", async () => {
     const client = await createPrismaClient(data);
     const element = await client.element.create({

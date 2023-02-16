@@ -174,6 +174,19 @@ const createPrismaMock = <P>(
       return 0;
     };
 
+    const getImplicitKeys = (field, model) => {
+      if (model.name < field.type) {
+        return {
+          originKey: "A",
+          targetKey: "B",
+        };
+      }
+      return {
+        originKey: "B",
+        targetKey: "A",
+      };
+    };
+
     const nestedUpdate = (args, isCreating: boolean, item) => {
       let d = args.data;
       Object.entries(d).forEach(([key, value]) => {
@@ -202,7 +215,25 @@ const createPrismaMock = <P>(
               connections.forEach((connect, idx) => {
                 const keyToMatch = Object.keys(connect)[0];
 
-                if (field.relationToFields.length > 0) {
+                const implictTableName = `_${field.relationName}`;
+                if (data[implictTableName]) {
+                  const keyToGet = field.relationToFields[0];
+                  const fromId = item?.[keyToGet] ?? d[keyToGet];
+                  const toId = connect[keyToGet];
+
+                  const implicitTable = data[implictTableName];
+
+                  const { originKey, targetKey } = getImplicitKeys(
+                    field,
+                    model
+                  );
+                  implicitTable[`${fromId}_${toId}`] = {
+                    [originKey]: fromId,
+                    [targetKey]: toId,
+                  };
+                  data[implictTableName] = implicitTable;
+                  d = rest;
+                } else if (field.relationToFields.length > 0) {
                   const keyToGet = field.relationToFields[0];
                   const targetKey = field.relationFromFields[0];
                   let connectionValue = connect[keyToGet];
@@ -716,6 +747,7 @@ const createPrismaMock = <P>(
           where[field.name] = d[field.name];
         }
       }
+      console.log(JSON.stringify(data, undefined, 4));
       return findOne({ where, ...args });
     };
 
@@ -792,6 +824,8 @@ const createPrismaMock = <P>(
 
         // Construct arg for relation query
         let subArgs = obj[key] === true ? {} : obj[key];
+        const implictTableName = `_${schema.relationName}`;
+        const isImplicitManyToMany = data[implictTableName] && !subArgs.where;
         subArgs = {
           ...subArgs,
           where: {
@@ -800,7 +834,37 @@ const createPrismaMock = <P>(
           },
         };
 
-        if (schema.isList) {
+        if (isImplicitManyToMany) {
+          // Get implicit-many-to-many
+          const { originKey, targetKey } = getImplicitKeys(schema, model);
+          const keyToGet = schema.relationToFields[0];
+          const valueToFind = newItem[keyToGet];
+
+          const ids = Object.values(data[implictTableName])
+            .filter((row) => row[originKey] === newItem[keyToGet])
+            .map((row) => row[targetKey]);
+
+          console.log(
+            "implicit",
+            model.name,
+            schema.type,
+            targetKey,
+            originKey,
+            valueToFind,
+            Object.values(data[implictTableName])
+          );
+
+          newItem = {
+            ...newItem,
+            [key]: delegate.findMany({
+              where: {
+                id: {
+                  in: ids,
+                },
+              },
+            }),
+          };
+        } else if (schema.isList) {
           // Add relation
           newItem = {
             ...newItem,
@@ -916,6 +980,17 @@ const createPrismaMock = <P>(
       };
     }
     data = removeMultiFieldIds(model, data);
+
+    // Setup implicit Many-to-Many tables
+    model.fields.forEach((field) => {
+      if (
+        field.isList &&
+        field.relationToFields.length > 0 &&
+        field.relationFromFields.length === 0
+      ) {
+        data[`_${field.relationName}`] = {};
+      }
+    });
 
     const objs = Delegate(c, model);
     Object.keys(objs).forEach((fncName) => {
