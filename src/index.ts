@@ -747,7 +747,6 @@ const createPrismaMock = <P>(
           where[field.name] = d[field.name];
         }
       }
-      console.log(JSON.stringify(data, undefined, 4));
       return findOne({ where, ...args });
     };
 
@@ -843,16 +842,6 @@ const createPrismaMock = <P>(
           const ids = Object.values(data[implictTableName])
             .filter((row) => row[originKey] === newItem[keyToGet])
             .map((row) => row[targetKey]);
-
-          console.log(
-            "implicit",
-            model.name,
-            schema.type,
-            targetKey,
-            originKey,
-            valueToFind,
-            Object.values(data[implictTableName])
-          );
 
           newItem = {
             ...newItem,
