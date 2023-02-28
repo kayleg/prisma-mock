@@ -78,10 +78,18 @@ model Document {
   id   String @id @default(cuid())
   name String
 
-  tags Tag[]
+  tags    Tag[]
+  folders Folder[]
 }
 
 model Tag {
+  id   String @id @default(cuid())
+  name String
+
+  documents Document[]
+}
+
+model Folder {
   id   String @id @default(cuid())
   name String
 
