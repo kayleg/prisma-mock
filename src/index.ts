@@ -846,6 +846,7 @@ const createPrismaMock = <P>(
           newItem = {
             ...newItem,
             [key]: delegate.findMany({
+              ...subArgs,
               where: {
                 id: {
                   in: ids,
