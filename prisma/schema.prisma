@@ -87,11 +87,14 @@ model Tag {
   name String
 
   documents Document[]
+  folders   Folder[]
 }
 
 model Folder {
-  id   String @id @default(cuid())
-  name String
+  id    String  @id @default(cuid())
+  name  String
+  tagId String?
 
   documents Document[]
+  tag       Tag?       @relation(fields: [tagId], references: [id])
 }

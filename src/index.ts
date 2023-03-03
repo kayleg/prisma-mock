@@ -293,7 +293,7 @@ const createPrismaMock = <P>(
                   );
                   delegate.update({
                     where: {
-                      [fromKey]: connect[keyToMatch],
+                      [keyToMatch]: connect[keyToMatch],
                     },
                     data: {
                       [getCamelCase(inverse.name)]: {

@@ -125,4 +125,26 @@ describe("PrismaMock update", () => {
     expect(user.name).toEqual("Henk");
     expect(user.clicks).toEqual(2);
   });
+
+  test("updating many records", async () => {
+    const client = await createPrismaClient(data);
+    await client.user.updateMany({
+      where: {
+        id: {
+          in: [1, 2],
+        },
+      },
+      data: {
+        name: undefined,
+        clicks: 99,
+      },
+    });
+    let user = await client.user.findUnique({ where: { id: 1 } });
+    expect(user.name).toEqual("Henk");
+    expect(user.clicks).toEqual(99);
+
+    user = await client.user.findUnique({ where: { id: 2 } });
+    expect(user.name).toEqual("Piet");
+    expect(user.clicks).toEqual(99);
+  });
 });
