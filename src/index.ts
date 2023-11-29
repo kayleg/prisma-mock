@@ -55,8 +55,11 @@ const createPrismaMock = <P>(
   ) => {
     const c = getCamelCase(model.name);
     const idFields =
-      model.fields.filter((r) => r.isId).map((t) => t.name) ||
-      model.primaryKey?.fields;
+      model.fields
+        .filter((r) => r.name.includes("Id"))
+        .map((t) => t.name)
+        .slice()
+        .reverse() || model.primaryKey?.fields;
 
     const removeId = (ids: string[]) => {
       const id = ids.join("_");
@@ -73,7 +76,8 @@ const createPrismaMock = <P>(
     };
 
     if (idFields?.length > 1) {
-      removeId(idFields);
+      console.log("remove", idFields);
+      // removeId(idFields);
     }
 
     if (model.uniqueFields?.length > 0) {
@@ -571,8 +575,11 @@ const createPrismaMock = <P>(
             return res.length > 0;
           }
           const idFields =
-            model.fields.filter((r) => r.isId).map((t) => t.name) ||
-            model.primaryKey?.fields;
+            model.fields
+              .filter((r) => r.name.includes("Id"))
+              .map((t) => t.name)
+              .slice()
+              .reverse() || model.primaryKey?.fields;
           if (idFields?.length > 1) {
             if (child === idFields.join("_")) {
               return shallowCompare(item, filter);
