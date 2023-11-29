@@ -125,7 +125,10 @@ test("Should throw error when more then one key in orderBy field", async () => {
     })
   ).rejects.toThrow(
     new Prisma.PrismaClientValidationError(
-      "Argument orderBy of needs exactly one argument, but you provided account and sort. Please choose one."
+      "Argument orderBy of needs exactly one argument, but you provided account and sort. Please choose one.",
+      {
+        clientVersion: "5.6.0",
+      }
     )
   );
 });
