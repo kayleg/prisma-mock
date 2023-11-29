@@ -1,6 +1,5 @@
 // @ts-nocheck
 
-import { PrismaClientKnownRequestError } from "@prisma/client/runtime";
 import createPrismaClient from "../src/";
 
 describe("defaults", () => {

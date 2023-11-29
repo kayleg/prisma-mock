@@ -1,6 +1,6 @@
 // @ts-nocheck
 
-import { PrismaClientKnownRequestError } from "@prisma/client/runtime";
+import { Prisma } from "@prisma/client";
 import createPrismaClient from "../src/";
 
 describe("PrismaClient", () => {
@@ -325,7 +325,7 @@ describe("PrismaClient", () => {
         },
       })
     ).rejects.toThrow(
-      new PrismaClientKnownRequestError(
+      new Prisma.PrismaClientKnownRequestError(
         "An operation failed because it depends on one or more records that were required but not found. {cause}",
         "P2025",
         "1.2.3"
